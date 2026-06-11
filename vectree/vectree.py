@@ -1,5 +1,6 @@
 import os, torch, argparse, math
 import numpy as np
+import zipfile
 from copy import deepcopy
 from tqdm import tqdm, trange
 
@@ -147,8 +148,14 @@ class Quantization():
             
 
         # zip everything together to get final size
-        os.system(f"zip -r {save_path}/extreme_saving.zip {save_path}/extreme_saving")
-        size = os.path.getsize(f'{save_path}/extreme_saving.zip')
+        zip_out = f'{save_path}/extreme_saving.zip'
+        src_dir = f'{save_path}/extreme_saving'
+        with zipfile.ZipFile(zip_out, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for root, dirs, files in os.walk(src_dir):
+                for file in files:
+                    fp = os.path.join(root, file)
+                    zf.write(fp, os.path.relpath(fp, os.path.dirname(src_dir)))
+        size = os.path.getsize(zip_out)
         size_MB = size / 1024.0 / 1024.0
         print("Size = {:.2f} MB".format(size_MB))
             
